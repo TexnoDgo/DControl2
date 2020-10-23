@@ -4,6 +4,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from django.dispatch import receiver
 
+#from OrderApp.models import Order
+
 
 class Device(models.Model):
     title = models.CharField(max_length=255)
@@ -33,6 +35,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     root_status = models.CharField(max_length=100, choices=ROOT_STATUS_LIST, default='GUEST')
     active_project = models.ForeignKey(Project, on_delete=models.CASCADE, default=None)
+    #active_order = models.ForeignKey(Order, on_delete=models.CASCADE, default=None)
 
     def __str__(self):
         return "Profile: " + self.user.username
