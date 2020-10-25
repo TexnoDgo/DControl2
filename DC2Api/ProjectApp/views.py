@@ -1,26 +1,34 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from .models import Project, Profile, Device
+from .models import Project, Device, TestModel
+from ProfileApp.models import Profile
+
+from django.views.decorators.csrf import csrf_exempt
+
+from .forms import  TestForm
 
 
-def get_active_project(request, url):  # Получение значения активного проекта у пользователя
+def get_active_project(request, user_name):  # Получение значения активного проекта у пользователя
     if request.method == 'GET':
         try:
-            user = Profile.objects.get(user__username=url)
+            user = Profile.objects.get(user__username=user_name)
             active_project = user.active_project
             project_device = active_project.device
             active_order = user.active_order
             user = str(user.user.username)
             active_project = str(active_project)
             project_device = str(project_device)
+            active_order = str(active_order)
         except Exception:
             user = 'Name'
             active_project = 'active_project'
             project_device = 'project_device'
+            active_order = 'active_order'
         data = {
             'user':             user,
             'active_project':   active_project,
-            'project_device':   project_device
+            'project_device':   project_device,
+            'active_order': active_order,
         }
         return JsonResponse(data)
 
@@ -63,7 +71,7 @@ def change_active_device(request, user_name, project_name):  # Изминеин�
                 if project.title == project_name:
                     user.active_project = project
                     user.save()
-                    data["answer"] = project_name
+                    data["answer"] = project.device.title
         except Exception:
             data["answer"] = "Пользователь не найден"
     else:
@@ -85,7 +93,7 @@ def create_project(request, project_name, device_name, user_name, choose):  # С
                 if device.title == device_name:
                     new_project = Project(title=project_name, author=user.user, device=device)
                     new_project.save()
-                    data["answer"] = new_project
+                    data["answer"] = new_project.title
                     print('Ok2')
             if choose == 'choose':
                 user.active_project = new_project
@@ -96,3 +104,50 @@ def create_project(request, project_name, device_name, user_name, choose):  # С
         data["answer"] = "ERROR"
         print('NoPOST')
     return JsonResponse(data)
+
+
+def device_for_project(request, project_name):
+    data = {}
+    if request.method == 'GET':
+        try:
+            projects = Project.objects.all()
+            for project in projects:
+                if project.title == project_name:
+                    data["answer"] = project.title
+        except Exception:
+            data["answer"] = "Проект найден"
+    else:
+        data["answer"] = "ERROR"
+    return JsonResponse(data)
+
+
+@csrf_exempt
+def test_file_upload(request, name):
+    data = {}
+    if request.method == 'PUT':
+        file = request.FILES.get('file')
+        print(name)
+        print(file)
+        data['answer'] = name
+    return JsonResponse(data)
+
+
+from rest_framework.parsers import FileUploadParser
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework import status
+
+from .serializers import FileSerializer
+
+
+class FileUploadView(APIView):
+    parser_class = (FileUploadParser,)
+
+    def post(self, request, *args, **kwargs):
+        file_serializer = FileSerializer(data=request.data)
+
+        if file_serializer.is_valid():
+            file_serializer.save()
+            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-from ProjectApp.models import Project, Profile, Device
+from ProjectApp.models import Project
 
 
 class Order(models.Model):
@@ -12,9 +12,10 @@ class Order(models.Model):
     readiness = models.DateField(null=True)
     table = models.FileField(upload_to="ORDERS_TABLE", default=None)
     qr_code_list = models.FileField(upload_to='ORDERS_QR_CODE_LIST', default=None)
+    pdf_specification = models.FileField(upload_to='ORDER_PDF_SPECIFICATION', default=None)
     draw_archive = models.FileField(upload_to='ORDERS_DRAW_ARCHIVE', default=None)
     dxf_archive = models.FileField(upload_to='ORDERS_DXF_ARCHIVE', default=None)
     part_archive = models.FileField(upload_to='ORDERS_PART_ARCHIVE', default=None)
 
     def __str__(self):
-        return "Order: " + self.title + "; Project: " + self.project.title
+        return self.title
