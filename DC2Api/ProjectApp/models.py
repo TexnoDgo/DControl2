@@ -23,8 +23,4 @@ class Project(models.Model):
 
 
 class TestModel(models.Model):
-    title = models.CharField(max_length=100)
     file = models.FileField(upload_to='TEST_FILE')
-
-    def __str__(self):
-        return self.title

@@ -3,6 +3,7 @@ from django.http import JsonResponse
 from .models import Project, Device, TestModel
 from ProfileApp.models import Profile
 
+
 from django.views.decorators.csrf import csrf_exempt
 
 from .forms import  TestForm
@@ -132,22 +133,30 @@ def test_file_upload(request, name):
     return JsonResponse(data)
 
 
-from rest_framework.parsers import FileUploadParser
+from rest_framework.parsers import FileUploadParser, MultiPartParser, FormParser, JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.renderers import JSONRenderer
 from rest_framework import status
 
 from .serializers import FileSerializer
 
 
 class FileUploadView(APIView):
-    parser_class = (FileUploadParser,)
+    parser_classes = [FileUploadParser, JSONParser, FormParser, MultiPartParser]
 
-    def post(self, request, *args, **kwargs):
-        file_serializer = FileSerializer(data=request.data)
+    renderer_classes = [JSONRenderer]
 
-        if file_serializer.is_valid():
-            file_serializer.save()
-            return Response(file_serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request, filename, format=None):
+        file_obj = request.data['file']
+        print(request.META.get('HTTP_TITLE'))
+        #print(file_obj)
+        #print(filename)
+        file = TestModel(file=file_obj)
+        #print('after file')
+        file.save()
+
+        return Response(status=204)
+
+
+
