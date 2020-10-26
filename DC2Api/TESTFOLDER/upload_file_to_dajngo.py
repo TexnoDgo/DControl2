@@ -1,20 +1,12 @@
-import requests
-
-file_name = "Hi!"
-
-url = "http://127.0.0.1:8000/project/upload"
-
-file_path = "C:/PP/DControl2/DC2Api/TESTFOLDER/plus.png"
-
-file2 = open(file_path)
-
-print(file2.read(5))
-
-files = {'file': (open(file_path, 'rb'), 'multipart/form-data'), 'title': "kek"}
-print(files)
-
-
-r = requests.post(url, files=files)
-
-print(r.status_code)
-print(r.text)
+import http.client
+import mimetypes
+conn = http.client.HTTPSConnection("127.0.0.1", 8000)
+payload = "C:/Users/User/Desktop/МК2.02.02.02.001 Втулка.PDF"
+headers = {
+  'title': 'kekker',
+  'Content-Type': 'image/jpeg'
+}
+conn.request("PUT", 'http://127.0.0.1:8000/project/upload/МК2.02.02.02.001 Втулка.PDF', payload, headers)
+res = conn.getresponse()
+data = res.read()
+print(data.decode("utf-8"))

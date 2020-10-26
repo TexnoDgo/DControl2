@@ -152,11 +152,8 @@ class FileUploadView(APIView):
         print(request.META.get('HTTP_TITLE'))
         #print(file_obj)
         #print(filename)
-        file = TestModel(file=file_obj)
+        file = TestModel(file=file_obj, title=filename)
         #print('after file')
         file.save()
 
         return Response(status=204)
-
-
-
